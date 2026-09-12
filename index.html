@@ -86,14 +86,14 @@
             }
             livros.forEach(livro => {
                 container.innerHTML += `
-                    <div class="livro">
-                        <h3>${livro.titulo}</h3>
-                        <p><b>Classe:</b> ${livro.classe}</p>
-                        <p><b>Disciplina:</b> ${livro.disciplina}</p>
-                        <p><b>Autor:</b> ${livro.autor}</p>
-                        <a href="${livro.urlPdf}" target="_blank" class="btn">Ler PDF</a>
-                    </div>
-                `;
+    <div class="livro">
+        <h3>${livro.titulo || 'Sem título'}</h3>
+        <p><b>Classe:</b> ${livro.classe || '-'}</p>
+        <p><b>Disciplina:</b> ${livro.disciplina || 'Não definida'}</p>
+        <p><b>Autor:</b> ${livro.autor || 'Desconhecido'}</p>
+        <a href="${livro.urlPdf}" target="_blank" class="btn">Ler PDF</a>
+    </div>
+`;
             });
         }
 
