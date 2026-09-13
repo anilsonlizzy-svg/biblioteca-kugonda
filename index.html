@@ -4,119 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biblioteca Kugonda</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-        h1 { text-align: center; color: #2c3e50; }
-        .filtros { max-width: 800px; margin: 20px auto; display: flex; gap: 10px; flex-wrap: wrap; }
-        .filtros input, .filtros select { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; flex: 1; }
-        #livros { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
-        .livro { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .livro h3 { margin: 0 0 10px 0; color: #2980b9; }
-        .livro p { margin: 5px 0; color: #555; }
-        .btn { display: inline-block; margin-top: 10px; padding: 10px 15px; background: #2980b9; color: white; text-decoration: none; border-radius: 5px; }
-        .btn:hover { background: #21618c; }
+        h1 { text-align: center; color: #333; }
+      .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
+      .livro { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+      .livro h3 { margin-top: 0; color: #0056b3; }
+      .btn { display: inline-block; margin-top: 10px; padding: 10px 15px; background: #0056b3; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; width: 100%; text-align: center; box-sizing: border-box; }
+      .btn[disabled] { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <h1>📚 Biblioteca Kugonda</h1>
-
-    <div class="filtros">
-        <input type="text" id="pesquisa" placeholder="Pesquisar por título ou autor...">
-        <select id="filtroClasse">
-            <option value="">Todas as Classes</option>
-            <option value="8ª">8ª Classe</option>
-            <option value="9ª">9ª Classe</option>
-            <option value="10ª">10ª Classe</option>
-            <option value="11ª">11ª Classe</option>
-            <option value="12ª">12ª Classe</option>
-        </select>
-        <select id="filtroDisciplina">
-            <option value="">Todas Disciplinas</option>
-            <option value="Matemática">Matemática</option>
-            <option value="Português">Português</option>
-            <option value="Biologia">Biologia</option>
-            <option value="Física">Física</option>
-            <option value="Química">Química</option>
-            <option value="História">História</option>
-            <option value="Geografia">Geografia</option>
-            <option value="Inglês">Inglês</option>
-            <option value="Francês">Francês</option>
-            <option value="Filosofia">Filosofia</option>
-            <option value="Educação Moral">Educação Moral</option>
-            <option value="Informática">Informática</option>
-            <option value="Educação Física">Educação Física</option>
-        </select>
+    <div class="container" id="livros-container">
+        <p>Carregando livros...</p>
     </div>
 
-    <div id="livros">Carregando livros...</div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+    <script>
         const firebaseConfig = {
-  apiKey: "AIza...",
-  authDomain: "biblioteca-kugonda.firebaseapp.com",
-  projectId: "biblioteca-kugonda",
-  storageBucket: "biblioteca-kugonda.appspot.com",
-  messagingSenderId: "9876543210",
-  appId: "1:9876543210:web:a1b2c3d4e5f6g7h8"
-};
+          apiKey: "AIzaSyDWIzYfo-Dyydfp05rF9RaMw6MDhNb_uKE",
+          authDomain: "kugonda-online.firebaseapp.com",
+          projectId: "kugonda-online",
+          storageBucket: "kugonda-online.firebasestorage.app",
+          messagingSenderId: "197225463034",
+          appId: "1:197225463034:web:05a199b1d6be8ed6355d43"
+        };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        let todosLivros = [];
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const container = document.getElementById('livros-container');
 
-        async function carregarLivros() {
-            const querySnapshot = await getDocs(collection(db, "livros"));
-            todosLivros = [];
-            querySnapshot.forEach((doc) => {
-                todosLivros.push(doc.data());
-            });
-            mostrarLivros(todosLivros);
-        }
-
-        function mostrarLivros(livros) {
-            const container = document.getElementById('livros');
-            container.innerHTML = '';
-            if(livros.length === 0) {
-                container.innerHTML = '<p>Nenhum livro encontrado.</p>';
-                return;
+        db.collection("livros").get().then((querySnapshot) => {
+            container.innerHTML = "";
+            if(querySnapshot.empty) {
+                container.innerHTML = "<p>Nenhum livro encontrado.</p>";
             }
-            livros.forEach(livro => {
-    container.innerHTML += `
-<div class="livro">
-    <h3>${livro.titulo || 'Sem título'}</h3>
-    <p><b>Classe:</b> ${livro.classe || '-'}</p>
-    <p><b>Disciplina:</b> ${livro.disciplina || 'Não definida'}</p>
-    <p><b>Autor:</b> ${livro.autor || 'Desconhecido'}</p>
-    ${livro.urlPdf ? `<a href="${livro.urlPdf}" target="_blank" class="btn">Ler PDF</a>` : `<button class="btn" disabled>Sem PDF</button>`}
-</div>
-`;
-});
-`;
+            querySnapshot.forEach((doc) => {
+                const livro = doc.data();
+                container.innerHTML += `
+                <div class="livro">
+                    <h3>${livro.titulo || 'Sem título'}</h3>
+                    <p><b>Classe:</b> ${livro.classe || '-'}</p>
+                    <p><b>Disciplina:</b> ${livro.disciplina || '-'}</p>
+                    <p><b>Autor:</b> ${livro.autor || '-'}</p>
+                    ${livro.urlPdf? `<a href="${livro.urlPdf}" target="_blank" class="btn">Ler PDF</a>` : `<button class="btn" disabled>Sem PDF</button>`}
+                </div>
+                `;
             });
-        }
-
-        function filtrar() {
-            const termo = document.getElementById('pesquisa').value.toLowerCase();
-            const classe = document.getElementById('filtroClasse').value;
-            const disciplina = document.getElementById('filtroDisciplina').value;
-
-            const filtrados = todosLivros.filter(livro => {
-                return (livro.titulo.toLowerCase().includes(termo) || livro.autor.toLowerCase().includes(termo))
-                    && (classe === '' || livro.classe === classe)
-                    && (disciplina === '' || livro.disciplina === disciplina);
-            });
-            mostrarLivros(filtrados);
-        }
-
-        document.getElementById('pesquisa').addEventListener('input', filtrar);
-        document.getElementById('filtroClasse').addEventListener('change', filtrar);
-        document.getElementById('filtroDisciplina').addEventListener('change', filtrar);
-
-        carregarLivros();
+        }).catch((error) => {
+            console.log("Erro: ", error);
+            container.innerHTML = "<p>Erro ao carregar livros. Confere as regras do Firebase.</p>";
+        });
     </script>
+
 </body>
 </html>
